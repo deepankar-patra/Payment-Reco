@@ -1,0 +1,67 @@
+Identify Data Sources:
+FO Payments: Contains payment transaction data in the fo_transaction_payments table.
+Portal : Contains payment transaction data in the portal_transaction_payments table.
+
+2. Define Reconciliation Rules:
+We'll reconcile transactions based on the following criteria: transaction ID, payment amount, payment date, and reference ID.
+
+3. Data Extraction:
+-- Extract payment data from FO Payments
+SELECT
+    transaction_id,
+    reference_id,
+    payment_amount,
+    payment_date
+FROM
+    fo_transaction_payments;
+
+-- Extract payment data from Portal
+SELECT
+    transaction_id,
+    reference_id,
+    payment_amount,
+    payment_date
+FROM
+    portal_transaction_payments;
+
+
+4. Data Comparison:
+-- Compare payment data between FO Payments and Portal using reconciliation rules
+SELECT
+    'FO Payments' AS statement_source,
+    transaction_id,
+    reference_id,
+    payment_amount,
+    payment_date
+FROM
+    fo_transaction_payments
+WHERE
+    (transaction_id, payment_amount, payment_date, reference_id) NOT IN (
+        SELECT
+            transaction_id,
+            reference_id,
+            payment_amount,
+            payment_date
+        FROM
+            portal_transaction_payments
+    )
+UNION ALL
+SELECT
+    'Portal' AS statement_source,
+    transaction_id,
+    reference_id,
+    payment_amount,
+    payment_date
+FROM
+    portal_transaction_payments
+WHERE
+    (transaction_id, payment_amount, payment_date, reference_id) NOT IN (
+        SELECT
+            transaction_id,
+            reference_id,
+            payment_amount,
+            payment_date
+        FROM
+            fo_transaction_payments
+    );
+
